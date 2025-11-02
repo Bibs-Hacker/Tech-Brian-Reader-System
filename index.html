@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Brian Reader - Mega System</title>
+    <style>
+        /* BASE & NEON STYLES */
+        :root {
+            --neon-blue: #00ffff;
+            --neon-green: #00ff00;
+            --neon-red: #ff073a;
+            --neon-purple: #8a2be2;
+            --bg-color-dark: #0a0a0a;
+            --text-color-dark: #e0e0e0;
+            --bg-color-light: #f5f5f5;
+            --text-color-light: #222222;
+            --card-bg-dark: #1a1a1a;
+            --card-bg-light: #ffffff;
+            --border-radius: 10px;
+            --splash-duration: 4s;
+            --font-family: 'Electrolize', sans-serif; /* A techy-looking font */
+        }
+
+        @font-face {
+            font-family: 'Electrolize';
+            src: url('https://fonts.gstatic.com/s/electrolize/v17/BPZz1rndoxLTV90yYU2y87s.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            transition: background-color 0.5s, color 0.5s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color-dark);
+            background-color: var(--bg-color-dark);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* DARK/LIGHT MODE TOGGLE */
+        body.light-mode {
+            color: var(--text-color-light);
+            background-color: var(--bg-color-light);
+        }
+
+        body.light-mode .container, body.light-mode .footer, body.light-mode .card, body.light-mode #documentContent {
+            background-color: var(--card-bg-light);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        body.light-mode .neon-button {
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* BACKGROUND CHAOS ANIMATION (PARTICLES) */
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3; /* Subtle background */
+        }
+        .particle {
+            position: absolute;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue);
+            animation: move linear infinite;
+        }
+        @keyframes move {
+            0% { transform: translate(0, 0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)); opacity: 0; }
+        }
+
+        /* SPLASH SCREEN */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 1s ease-out var(--splash-duration);
+            pointer-events: all;
+        }
+
+        #splash-title {
+            font-size: 3.5em;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red), 0 0 40px var(--neon-red);
+            color: var(--neon-red);
+            letter-spacing: 5px;
+            animation: flicker 1.5s infinite alternate;
+        }
+
+        #splash-subtitle {
+            margin-top: 10px;
+            font-size: 1.5em;
+            color: var(--neon-blue);
+            text-shadow: 0 0 5px var(--neon-blue);
+            animation: glow 1s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; text-shadow: 0 0 10px var(--neon-red); }
+            20%, 24%, 55% { opacity: 0.8; text-shadow: none; }
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue); }
+            to { text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue); }
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* MAIN LAYOUT */
+        .container {
+            padding: 20px;
+            max-width: 900px;
+            margin: 50px auto;
+            background: var(--card-bg-dark);
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue);
+            border-radius: var(--border-radius);
+            flex-grow: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--neon-green);
+            text-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green);
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg-dark);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--neon-purple);
+            box-shadow: 0 0 10px var(--neon-purple);
+        }
+
+        input[type="file"], textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--neon-blue);
+            color: var(--text-color-dark);
+            box-shadow: inset 0 0 5px var(--neon-blue);
+            resize: vertical;
+        }
+        body.light-mode input[type="file"], body.light-mode textarea {
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-color-light);
+            border: 1px solid var(--neon-blue);
+            box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* NEON BUTTONS */
+        .neon-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-right: 10px;
+            transition: all 0.3s ease-in-out;
+            background: transparent;
+        }
+
+        #readBtn {
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green);
+        }
+        #readBtn:hover {
+            background-color: var(--neon-green);
+            color: var(--bg-color-dark);
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        #playPauseBtn {
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            box-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue);
+        }
+        #playPauseBtn.playing {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+            box-shadow: 0 0 5px var(--neon-red), 0 0 15px var(--neon-red);
+        }
+        #playPauseBtn:hover {
+            opacity: 0.8;
+        }
+
+        #documentContent {
+            min-height: 200px;
+            white-space: pre-wrap;
+            padding: 15px;
+            border: 1px dashed var(--neon-purple);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+            overflow-y: auto;
+            margin-top: 15px;
+            line-height: 1.8;
+            transition: background 0.5s;
+        }
+
+        /* HIGHLIGHT & SCROLL */
+        .highlight {
+            background-color: rgba(255, 255, 0, 0.5); /* Yellow highlight */
+            color: black;
+            padding: 2px 0;
+            border-radius: 2px;
+            transition: background-color 0.1s;
+        }
+
+        /* DARK/LIGHT TOGGLE */
+        #toggle-theme {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: var(--neon-blue);
+            color: var(--bg-color-dark);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        body.light-mode #toggle-theme {
+            background: var(--neon-purple);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 10px var(--neon-purple);
+        }
+
+
+        /* FOOTER & CONTACT */
+        .footer {
+            margin-top: 40px;
+            padding: 15px 20px;
+            text-align: center;
+            background: var(--card-bg-dark);
+            border-top: 1px solid var(--neon-green);
+            box-shadow: 0 -5px 15px rgba(0, 255, 0, 0.1);
+            color: var(--neon-green);
+            font-size: 0.9em;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .contact-me a {
+            color: var(--neon-purple);
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s;
+            text-shadow: 0 0 5px var(--neon-purple);
+        }
+        .contact-me a:hover {
+            color: var(--text-color-dark);
+            text-shadow: 0 0 15px var(--neon-purple);
+        }
+        body.light-mode .contact-me a {
+            color: var(--neon-red);
+            text-shadow: none;
+        }
+        body.light-mode .contact-me a:hover {
+            color: var(--neon-red);
+            text-shadow: 0 0 5px var(--neon-red);
+        }
+    </style>
+    <script>
+        // JAVASCRIPT LOGIC
+        document.addEventListener('DOMContentLoaded', () => {
+            const splashScreen = document.getElementById('splash-screen');
+            const toggleThemeBtn = document.getElementById('toggle-theme');
+            const readBtn = document.getElementById('readBtn');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const fileInput = document.getElementById('fileInput');
+            const manualTextarea = document.getElementById('manualTextarea');
+            const documentContentDiv = document.getElementById('documentContent');
+            const body = document.body;
+
+            let utterance = null;
+            let speechSynthesis = window.speechSynthesis;
+            let currentContent = '';
+            let isPaused = false;
+            let wordIndex = 0;
+            let contentWords = [];
+
+            // --- 1. SPLASH SCREEN & INITIALIZATION ---
+            setTimeout(() => {
+                splashScreen.classList.add('hidden');
+                // Auto-fade done by CSS transition
+            }, 3000); // Title stays for 3 seconds before transition starts
+
+            // --- 2. THEME TOGGLE (Dark/Light) ---
+            toggleThemeBtn.addEventListener('click', () => {
+                body.classList.toggle('light-mode');
+                const isLight = body.classList.contains('light-mode');
+                toggleThemeBtn.innerHTML = isLight ? '💡' : '🌑';
+                localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            });
+
+            // Load saved theme
+            if (localStorage.getItem('theme') === 'light') {
+                body.classList.add('light-mode');
+                toggleThemeBtn.innerHTML = '💡';
+            } else {
+                toggleThemeBtn.innerHTML = '🌑';
+            }
+
+
+            // --- 3. BACKGROUND CHAOS (Particle Generator) ---
+            const particlesContainer = document.getElementById('particles-js');
+            const numParticles = 30;
+            for(let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 3 + 1; // 1px to 4px
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.top = `${Math.random() * 100}vh`;
+                particle.style.left = `${Math.random() * 100}vw`;
+                
+                // Set CSS variables for animation endpoint
+                particle.style.setProperty('--x', `${(Math.random() - 0.5) * 500}px`);
+                particle.style.setProperty('--y', `${(Math.random() - 0.5) * 500}px`);
+                particle.style.animationDuration = `${Math.random() * 10 + 5}s`;
+                particle.style.animationDelay = `-${Math.random() * 10}s`; // Start at random point
+                particlesContainer.appendChild(particle);
+            }
+
+            // --- 4. FILE/TEXT INPUT & DISPLAY ---
+            const loadContent = (text) => {
+                currentContent = text.trim();
+                // Replace newlines with <br> for better display alignment with words
+                documentContentDiv.innerHTML = currentContent.split(/\s+/).map((word, index) =>
+                    `<span data-word-index="${index}">${word}</span>`
+                ).join(' ');
+                contentWords = Array.from(documentContentDiv.querySelectorAll('span'));
+                if (contentWords.length > 0) {
+                    playPauseBtn.disabled = false;
+                }
+            };
+
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        manualTextarea.value = ''; // Clear manual text
+                        loadContent(e.target.result);
+                    };
+                    reader.readAsText(file);
+                }
+            });
+
+            manualTextarea.addEventListener('input', () => {
+                fileInput.value = ''; // Clear file input
+                loadContent(manualTextarea.value);
+            });
+
+            // --- 5. TEXT-TO-SPEECH & HIGHLIGHTING LOGIC ---
+
+            const handleSpeechEnd = () => {
+                playPauseBtn.textContent = '▶️ Play';
+                playPauseBtn.classList.remove('playing');
+                // Remove last highlight
+                if (wordIndex > 0) {
+                    contentWords[wordIndex - 1].classList.remove('highlight');
+                }
+                wordIndex = 0;
+            };
+
+            const highlightAndScroll = () => {
+                if (wordIndex < contentWords.length) {
+                    // Remove highlight from previous word
+                    if (wordIndex > 0) {
+                        contentWords[wordIndex - 1].classList.remove('highlight');
+                    }
+
+                    // Highlight current word
+                    const currentWordSpan = contentWords[wordIndex];
+                    currentWordSpan.classList.add('highlight');
+
+                    // Auto-scroll
+                    const containerRect = documentContentDiv.getBoundingClientRect();
+                    const wordRect = currentWordSpan.getBoundingClientRect();
+
+                    // Scroll the container so the highlighted word is visible,
+                    // preferably near the center/top
+                    if (wordRect.bottom > containerRect.bottom || wordRect.top < containerRect.top) {
+                        documentContentDiv.scrollTop += (wordRect.top - containerRect.top) - (containerRect.height / 3);
+                    }
+
+                    wordIndex++;
+                }
+            };
+
+            // Custom function to step through the reading to trigger highlight/scroll
+            const startReadingLoop = (text) => {
+                wordIndex = 0;
+                let textWords = text.trim().split(/\s+/);
+                let charCount = 0;
+
+                // Stop any previous speech
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                }
+
+                utterance = new SpeechSynthesisUtterance(text);
+                utterance.voice = speechSynthesis.getVoices().find(v => v.lang.startsWith('en')) || speechSynthesis.getVoices()[0]; // Prefer English voice
+                
+                // This event is non-standard but often available in Chrome/Edge, fires *before* a word is spoken
+                // Used to trigger highlight/scroll
+                utterance.onboundary = (event) => {
+                    if (event.name === 'word') {
+                        // Find the word being spoken based on char index
+                        let currentWord = text.substring(event.charIndex).split(/\s+/)[0];
+                        // Advance wordIndex until we find a match (handles punctuation/spaces differences)
+                        // A more robust system would map Speech API tokens to DOM spans, but this is a decent single-file compromise.
+                        let found = false;
+                        for(let i = wordIndex; i < contentWords.length; i++) {
+                            // Simple check: if the word in the DOM starts with the word from the API
+                            if (contentWords[i].textContent.toLowerCase().startsWith(currentWord.toLowerCase())) {
+                                wordIndex = i; // Reset wordIndex to the found index
+                                highlightAndScroll();
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found && wordIndex < contentWords.length) {
+                             // If no match, just advance the visual highlight to keep up
+                             highlightAndScroll();
+                        }
+                    }
+                };
+
+                utterance.onend = handleSpeechEnd;
+                utterance.onerror = (event) => {
+                    console.error('Speech synthesis error:', event.error);
+                    alert('Error during reading. Check console.');
+                };
+
+                speechSynthesis.speak(utterance);
+            };
+
+
+            readBtn.addEventListener('click', () => {
+                if (!currentContent) {
+                    alert('Please load a document or type/paste text first.');
+                    return;
+                }
+                // Reset state
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                }
+                contentWords.forEach(span => span.classList.remove('highlight'));
+                wordIndex = 0;
+                isPaused = false;
+                
+                playPauseBtn.textContent = '⏸️ Pause';
+                playPauseBtn.classList.add('playing');
+                startReadingLoop(currentContent);
+            });
+
+
+            playPauseBtn.addEventListener('click', () => {
+                if (!speechSynthesis.speaking && !isPaused && currentContent) {
+                    // Start from scratch if not speaking and not paused (i.e., finished or cancelled)
+                    readBtn.click();
+                } else if (speechSynthesis.speaking) {
+                    speechSynthesis.pause();
+                    isPaused = true;
+                    playPauseBtn.textContent = '▶️ Play';
+                    playPauseBtn.classList.remove('playing');
+                } else if (isPaused) {
+                    speechSynthesis.resume();
+                    isPaused = false;
+                    playPauseBtn.textContent = '⏸️ Pause';
+                    playPauseBtn.classList.add('playing');
+                }
+            });
+
+            // --- 6. CONTACT LINKS ---
+            const setupContactLinks = () => {
+                const whatsappLink = document.querySelector('.contact-me a[href^="whatsapp:"]');
+                const mailtoLink = document.querySelector('.contact-me a[href^="mailto:"]');
+
+                const greeting = "Hello Brian, I am reaching out to you regarding your Tech Brian Reader system. I think it is great and I wanted to discuss...";
+
+                if (whatsappLink) {
+                    whatsappLink.href = `whatsapp://send?phone=254748950572&text=${encodeURIComponent(greeting)}`;
+                }
+
+                if (mailtoLink) {
+                    mailtoLink.href = `mailto:bridah988@gmail.com?subject=Inquiry%20from%20Tech%20Brian%20Reader%20User&body=${encodeURIComponent(greeting)}`;
+                }
+            };
+            setupContactLinks();
+        });
+    </script>
+</head>
+<body>
+
+    <div id="toggle-theme">🌑</div>
+
+    <div id="particles-js"></div>
+
+    <div id="splash-screen">
+        <div id="splash-title">Tech Brian Reader</div>
+        <div id="splash-subtitle">A Bombastic and Amaizing System</div>
+    </div>
+
+    <div class="container">
+        <h1>Tech Brian Reader System</h1>
+        
+        <div class="card">
+            <h2>Input Document/Text</h2>
+            <p>Upload a file or manually type/paste text.</p>
+            <input type="file" id="fileInput" accept=".txt, .html, .css, .js" placeholder="Select Document">
+            <textarea id="manualTextarea" rows="6" placeholder="...or paste your text here to read."></textarea>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <button id="readBtn" class="neon-button">Execute READ Command 🟢</button>
+            <button id="playPauseBtn" class="neon-button" disabled>▶️ Play 🔵</button>
+        </div>
+
+        <div class="card">
+            <h2>Document Contents:</h2>
+            <div id="documentContent">
+                System ready. Load a document or input text to begin reading.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <p>
+            System Developed by **Brian** | Dedicated to my amazing girlfriend, **Mercy Merab** ❤️
+        </p>
+        <div class="contact-me">
+            <p>Contact Me:</p>
+            <a href="whatsapp://send" target="_blank">WhatsApp Me: 254748950572</a> |
+            <a href="mailto:bridah988@gmail.com">Mail: bridah988@gmail.com</a> |
+            <span>Contact Me: 0748950572</span>
+        </div>
+        <p>
+            <small>Chaos is but a stepping stone to mastery. | System ID: TR0572B</small>
+        </p>
+    </div>
+
+</body>
+  </html>
